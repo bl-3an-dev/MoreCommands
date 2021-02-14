@@ -7,63 +7,99 @@ using System.Linq;
 
 namespace MoreCommands.commands
 {
+
     public class GamemodeCommand
     {
+
         private Loader Owner;
+
         public GamemodeCommand(Loader owner)
         {
             Owner = owner;
         }
+
+        /**
+         * Target @s, @e : NULL, why?
+         * Target player : sometimes no result, why?
+         */
+
         [Command(Name = "gamemode", Aliases = new[] { "gm" }, Description = "플레이어를 특정 게임 모드로 변경합니다.")]
-        public void Execute(Player player, int mode, Target target = null)
+        public void GameMode_Execute(Player sender, GameMode gameMode, Target player = null)
         {
+            Player targetPlayer = sender;
 
-            Player targetPlayer = player;
+            if(player != null)
+                targetPlayer = player.Players.FirstOrDefault();
 
-            if (target != null)
-                targetPlayer = Owner.GetPlayer(target.ToString());
-
-            if (targetPlayer == null)
+            if(targetPlayer == null)
             {
-                player.SendMessage("플레이어를 찾을 수 없습니다.");
+                sender.SendMessage("§c플레이어를 찾을 수 없습니다.");
                 return;
             }
 
-            targetPlayer.SetGameMode((GameMode)mode);
-
-            if (player == targetPlayer)
+            if (!Enum.IsDefined(typeof(GameMode), gameMode))
             {
-                player.SendMessage($"내 게임 모드를 {GamemodeName(mode)} 모드(으)로 변경했습니다.");
+                sender.SendMessage("§c알 수 없는 게임 모드입니다.");
+                return;
+            }
+
+            targetPlayer.SetGameMode(gameMode);
+
+            if(sender == targetPlayer)
+            {
+                sender.SendMessage($"내 게임 모드를 {(GameModeName)gameMode} 모드(으)로 변경했습니다.");
             }
             else
             {
-                player.SendMessage($"{targetPlayer.Username}님의 게임 모드를 {GamemodeName(mode)} 모드(으)로 변경했습니다.");
-                targetPlayer.SendMessage($"게임 모드가 {GamemodeName(mode)} 모드(으)로 업데이트되었습니다.");
+                sender.SendMessage($"{targetPlayer.Username}님의 게임 모드를 {(GameModeName)gameMode} 모드(으)로 변경했습니다.");
+                targetPlayer.SendMessage($"게임 모드가 {(GameModeName)gameMode} 모드(으)로 업데이트되었습니다.");
             }
 
         }
-        public static string GamemodeName(int gamemode)
+
+        [Command(Name = "gamemode", Aliases = new[] { "gm" }, Description = "플레이어를 특정 게임 모드로 변경합니다.")]
+        public void Int_Execute(Player sender, int gameMode, Target player = null)
         {
-            if (gamemode == 0)
+
+            Player targetPlayer = sender;
+
+            if(player != null)
+                targetPlayer = player.Players.FirstOrDefault();
+
+            if(targetPlayer == null)
             {
-                return "서바이벌";
+                sender.SendMessage("§c플레이어를 찾을 수 없습니다.");
+                return;
             }
-            else if (gamemode == 1)
+
+            if(!Enum.IsDefined(typeof(GameMode), (GameMode)gameMode))
             {
-                return "크리에이티브";
+                sender.SendMessage("§c알 수 없는 게임 모드입니다.");
+                return;
             }
-            else if (gamemode == 2)
+
+            targetPlayer.SetGameMode((GameMode)gameMode);
+
+            if(sender == targetPlayer)
             {
-                return "모험";
-            }
-            else if (gamemode == 3)
-            {
-                return "관람자";
+                sender.SendMessage($"내 게임 모드를 {(GameModeName)(GameMode)gameMode} 모드(으)로 변경했습니다.");
             }
             else
             {
-                return "알수없음";
+                sender.SendMessage($"{targetPlayer.Username}님의 게임 모드를 {(GameModeName)(GameMode)gameMode} 모드(으)로 변경했습니다.");
+                targetPlayer.SendMessage($"게임 모드가 {(GameModeName)(GameMode)gameMode} 모드(으)로 업데이트되었습니다.");
             }
+
         }
+
+        public enum GameModeName
+        {
+            서바이벌 = 0,
+            크리에이티브 = 1,
+            모험 = 2,
+            관람자 = 3
+        }
+
     }
+
 }
